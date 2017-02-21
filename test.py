@@ -124,6 +124,21 @@ for image in images:
 cars = cars[0:sample_size]
 notcars = notcars[0:sample_size]'''
 
+# Dictionary for all the parameters which can be tuned/changed
+parameter_tuning_dict = {
+    'color_space' : 'YCrCb', # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
+    'orient' : 9, # HOG orientations
+    'pix_per_cell' : 8, # HOG pixels per cell
+    'cell_per_block' : 2, # HOG cells per block
+    'hog_channel' : "ALL", # Can be 0, 1, 2, or "ALL"
+    'spatial_size' : (8, 8), # Spatial binning dimensions
+    'hist_bins' : 16, # Number of histogram bins
+    'spatial_feat' : True, # Spatial features on or off
+    'hist_feat' : True, # Histogram features on or off
+    'hog_feat' : True, # HOG features on or off
+    'y_start_stop' : [480, 700] # Min and max in y to search in slide_window()
+}
+
 color_space = 'YCrCb' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
 orient = 9  # HOG orientations
 pix_per_cell = 8 # HOG pixels per cell
@@ -179,11 +194,9 @@ print(round(t2-t1, 2), 'Seconds to train SVC...')
 
 # Check the score of the SVC
 print('Test Accuracy of SVC = ', round(svc.score(X_test, y_test), 4))
-# Check the prediction time for a single sample
-t1 = time.time()
 
 # Test the detection on a sample image
-image = mpimg.imread('bbox-example-image.jpg')
+image = mpimg.imread('test_images/bbox-example-image.jpg')
 plt.imshow(image)
 plt.title("Original Image")
 plt.show()
@@ -200,6 +213,8 @@ draw_image = np.copy(image)
 window_sizes = [32, 48, 64, 72, 96]
 
 for size in window_sizes:
+    print("Window Size: ", size)
+    
     windows = slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop,
                            xy_window=(size, size), xy_overlap=(0.5, 0.5))
 
