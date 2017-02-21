@@ -65,8 +65,11 @@ rand_state = 42
 X_train, X_test, y_train, y_test = train_test_split(
     scaled_X, y, test_size=0.2, random_state=rand_state)
 
-print('Using:',orient,'orientations',pix_per_cell,
-    'pixels per cell and', cell_per_block,'cells per block')
+print('Using:',
+      parameter_tuning_dict['color_space'], 'color space',
+      parameter_tuning_dict['orient'], 'orientations',
+      parameter_tuning_dict['pix_per_cell'], 'pixels per cell and',
+      parameter_tuning_dict['cell_per_block'], 'cells per block')
 print('Feature vector length:', len(X_train[0]))
 
 # Use a linear SVC
