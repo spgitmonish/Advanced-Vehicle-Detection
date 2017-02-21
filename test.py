@@ -4,11 +4,16 @@ import numpy as np
 import cv2
 import glob
 import time
+
 from sklearn.svm import LinearSVC
 from sklearn.preprocessing import StandardScaler
 from skimage.feature import hog
-from lesson_functions import *
 from sklearn.model_selection import train_test_split
+
+from spatial_color_features import *
+from hog_features import *
+from sliding_window import *
+from extract_features import *
 
 # Define a function to extract features from a single image window
 # This function is very similar to extract_features()
@@ -214,7 +219,7 @@ window_sizes = [32, 48, 64, 72, 96]
 
 for size in window_sizes:
     print("Window Size: ", size)
-    
+
     windows = slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop,
                            xy_window=(size, size), xy_overlap=(0.5, 0.5))
 
