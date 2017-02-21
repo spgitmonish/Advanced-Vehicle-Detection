@@ -5,7 +5,7 @@ from skimage.feature import hog
 
 # Define a function to return HOG features and visualization
 def get_hog_features(img, orient, pix_per_cell, cell_per_block,
-                        vis=False, feature_vec=True):
+                     vis=False, feature_vec=True):
     # Call with two outputs if vis==True
     if vis == True:
         features, hog_image = hog(img, orientations=orient,
