@@ -3,8 +3,9 @@ import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
-import glob
+import glob2
 import time
+import os
 
 # scikit learn modules
 from sklearn.svm import LinearSVC
@@ -18,15 +19,31 @@ from hog_features import *
 from sliding_window import *
 from extract_features import *
 
-# Read in cars and notcars
-images = glob.glob('labelled_data/*.jpeg')
 cars = []
 notcars = []
+
+# Read in cars and notcars
+'''images = glob2.glob('labelled_data/*.jpeg')
 for image in images:
     if 'image' in image or 'extra' in image:
         notcars.append(image)
     else:
-        cars.append(image)
+        cars.append(image)'''
+
+# Using glob2's glob API read all the images of
+# vehicles and non-vehicles
+car_images = glob2.glob('Datasets/vehicles/**/*.png')
+for car_image in car_images:
+    cars.append(car_image)
+
+not_car_images = glob2.glob('Datasets/vehicles/**/*.png')
+for not_car_image in not_car_images:
+    notcars.append(not_car_image)
+
+'''# Limit the number of images to 500
+sample_size = 500
+cars = cars[0:sample_size]
+notcars = notcars[0:sample_size]'''
 
 # Dictionary for all the parameters which can be tuned/changed
 parameter_tuning_dict = {
@@ -85,7 +102,8 @@ print(round(t2-t1, 2), 'Seconds to train SVC...')
 print('Test Accuracy of SVC = ', round(svc.score(X_test, y_test), 4))
 
 # Test the detection on a sample image
-image = mpimg.imread('test_images/bbox-example-image.jpg')
+'''file = test_images/bbox-example-image.jpg
+image = mpimg.imread(file)
 plt.imshow(image)
 plt.title("Original Image")
 plt.show()
@@ -93,10 +111,13 @@ plt.show()
 # Make a copy of the image
 draw_image = np.copy(image)
 
-# Uncomment the following line if you extracted training
-# data from .png images (scaled 0 to 1 by mpimg) and the
-# image you are searching is a .jpg (scaled 0 to 255)
-#image = image.astype(np.float32)/255
+# If the file extension is .jpg then mpimg above will
+# read the above image on a scale of 0 to 255, so need
+# to convert the image back to 0-1 because the training
+# was done on a scale of 0-1
+file_name, file_extension = os.path.splitext(file)
+if file_extension == '.jpg':
+    image = image.np.astype(float)/255
 
 # List of window sizes(definitely play around with the sizes)
 window_sizes = [32, 48, 64, 72, 96]
@@ -112,4 +133,4 @@ for size in window_sizes:
     window_img = draw_boxes(draw_image, hot_windows, color=(0, 0, 255), thick=6)
 
     plt.imshow(window_img)
-    plt.show()
+    plt.show()'''

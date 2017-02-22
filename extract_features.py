@@ -1,6 +1,7 @@
 import matplotlib.image as mpimg
 import numpy as np
 import cv2
+import os
 
 from hog_features import *
 from spatial_color_features import *
@@ -28,6 +29,10 @@ def single_img_features(img, parameter_tuning_dict):
             feature_image = cv2.cvtColor(img, cv2.COLOR_RGB2YCrCb)
         elif color_space == 'Lab':
             feature_image = cv2.cvtColor(image, cv2.COLOR_RGB2Lab)
+
+        # The training was done on a scale of 0-1 but cv2.cvtColor
+        # resizes after conversion to 0-255, so convert back
+        feature_image = feature_image.astype(np.float32)/255
     else:
         # Use the original image format
         feature_image = np.copy(img)
@@ -99,6 +104,16 @@ def extract_features(imgs, parameter_tuning_dict):
                 feature_image = cv2.cvtColor(image, cv2.COLOR_RGB2YUV)
             elif color_space == 'YCrCb':
                 feature_image = cv2.cvtColor(image, cv2.COLOR_RGB2YCrCb)
+            elif color_space == 'Lab':
+                feature_image = cv2.cvtColor(image, cv2.COLOR_RGB2Lab)
+
+            # If the file extension is .png then mpimg above will
+            # read the above image on a scale of 0 to 1, so need
+            # to convert the image back from 0-255 because cv2.imread
+            # converts images to 0-255 after conversion
+            file_name, file_extension = os.path.splitext(file)
+            if file_extension == '.png':
+                feature_image = feature_image.astype(np.float32)/255
         else:
             feature_image = np.copy(image)
 

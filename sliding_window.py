@@ -30,6 +30,7 @@ def search_windows(img, windows, clf, scaler, parameter_tuning_dict):
             detected_windows.append(window)
 
     #8) Return windows for positive detections
+    print(np.array(detected_windows).shape)
     return detected_windows
 
 # Define a function that takes an image,
