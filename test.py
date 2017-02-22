@@ -1,5 +1,4 @@
 # All other necessary modules
-import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
@@ -12,6 +11,9 @@ from sklearn.svm import LinearSVC
 from sklearn.preprocessing import StandardScaler
 from skimage.feature import hog
 from sklearn.model_selection import train_test_split
+
+# Scipy image reading function
+from scipy import misc
 
 # Import local functions
 from spatial_color_features import *
@@ -36,18 +38,18 @@ car_images = glob2.glob('Datasets/vehicles/**/*.png')
 for car_image in car_images:
     cars.append(car_image)
 
-not_car_images = glob2.glob('Datasets/vehicles/**/*.png')
+not_car_images = glob2.glob('Datasets/non-vehicles/**/*.png')
 for not_car_image in not_car_images:
     notcars.append(not_car_image)
 
-'''# Limit the number of images to 500
-sample_size = 500
+# Limit the number of images to 500
+'''sample_size = 500
 cars = cars[0:sample_size]
 notcars = notcars[0:sample_size]'''
 
 # Dictionary for all the parameters which can be tuned/changed
 parameter_tuning_dict = {
-    'color_space' : 'YCrCb', # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
+    'color_space' : 'Lab', # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
     'orient' : 9, # HOG orientations
     'pix_per_cell' : 8, # HOG pixels per cell
     'cell_per_block' : 2, # HOG cells per block
@@ -102,22 +104,14 @@ print(round(t2-t1, 2), 'Seconds to train SVC...')
 print('Test Accuracy of SVC = ', round(svc.score(X_test, y_test), 4))
 
 # Test the detection on a sample image
-'''file = test_images/bbox-example-image.jpg
-image = mpimg.imread(file)
+file = 'test_images/bbox-example-image.jpg'
+image = misc.imread(file)
 plt.imshow(image)
 plt.title("Original Image")
 plt.show()
 
 # Make a copy of the image
 draw_image = np.copy(image)
-
-# If the file extension is .jpg then mpimg above will
-# read the above image on a scale of 0 to 255, so need
-# to convert the image back to 0-1 because the training
-# was done on a scale of 0-1
-file_name, file_extension = os.path.splitext(file)
-if file_extension == '.jpg':
-    image = image.np.astype(float)/255
 
 # List of window sizes(definitely play around with the sizes)
 window_sizes = [32, 48, 64, 72, 96]
@@ -133,4 +127,4 @@ for size in window_sizes:
     window_img = draw_boxes(draw_image, hot_windows, color=(0, 0, 255), thick=6)
 
     plt.imshow(window_img)
-    plt.show()'''
+    plt.show()
