@@ -20,6 +20,7 @@ from spatial_color_features import *
 from hog_features import *
 from sliding_window import *
 from extract_features import *
+from apply_heat import *
 
 cars = []
 notcars = []
@@ -62,7 +63,7 @@ parameter_tuning_dict = {
 }
 
 # Min and max in y to search in slide_window()
-y_start_stop = [480, 700]
+y_start_stop = [300, 700]
 
 # Extract features of car and not-car images
 car_features = extract_features(cars, parameter_tuning_dict)
@@ -104,27 +105,74 @@ print(round(t2-t1, 2), 'Seconds to train SVC...')
 print('Test Accuracy of SVC = ', round(svc.score(X_test, y_test), 4))
 
 # Test the detection on a sample image
-file = 'test_images/bbox-example-image.jpg'
+'''file = 'test_images/bbox-example-image.jpg'
 image = misc.imread(file)
 plt.imshow(image)
 plt.title("Original Image")
+plt.show()'''
+
+video_files = glob2.glob("video_images/*.jpg")
+
+box_list = None
+for file in video_files:
+    if ( str(file) == "video_images\FC740.jpg" or str(file) == "video_images\FC741.jpg" or
+         str(file) == "video_images\FC742.jpg" or str(file) == "video_images\FC743.jpg" or
+         str(file) == "video_images\FC744.jpg" or str(file) == "video_images\FC745.jpg" or
+         str(file) == "video_images\FC746.jpg" or str(file) == "video_images\FC747.jpg" or
+         str(file) == "video_images\FC748.jpg" or str(file) == "video_images\FC749.jpg" ) :
+       # Read the image
+       image = misc.imread(file)
+
+       # Make a copy of the image
+       draw_image = np.copy(image)
+
+       # List of window sizes(definitely play around with the sizes)
+       window_sizes = [16, 32, 48, 64, 72, 96]
+       #window_sizes = [32]
+
+       for size in window_sizes:
+           #print("Window Size: ", size)
+
+           windows = slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop,
+                                  xy_window=(size, size), xy_overlap=(0.5, 0.5))
+
+           hot_windows = search_windows(image, windows, svc, X_scaler, parameter_tuning_dict)
+
+           '''window_img = draw_boxes(draw_image, hot_windows, color=(0, 0, 255), thick=6)
+
+           plt.imshow(window_img)
+           plt.title("Windows detected")
+           plt.show()'''
+
+           # Stack the hot windows verically
+           if box_list == None:
+               box_list = hot_windows
+           else:
+               box_list.extend(hot_windows)
+
+# Image for adding heat
+heat = np.zeros_like(image[:,:,0]).astype(np.float)
+
+# Add heat to each box in box list
+heat = add_heat(heat, box_list)
+
+# Apply threshold to help remove false positives
+heat = apply_threshold(heat, 2)
+
+# Visualize the heatmap when displaying
+# NOTE: Limit the values from 0<->255
+heatmap = np.clip(heat, 0, 255)
+
+# Find final boxes from heatmap using label function
+labels = label(heatmap)
+draw_img = draw_labeled_bboxes(np.copy(image), labels)
+
+fig = plt.figure()
+plt.subplot(121)
+plt.imshow(heatmap, cmap='hot')
+plt.title('Heat Map')
+plt.subplot(122)
+plt.imshow(draw_img)
+plt.title('Car Positions')
+fig.tight_layout()
 plt.show()
-
-# Make a copy of the image
-draw_image = np.copy(image)
-
-# List of window sizes(definitely play around with the sizes)
-window_sizes = [32, 48, 64, 72, 96]
-
-for size in window_sizes:
-    print("Window Size: ", size)
-
-    windows = slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop,
-                           xy_window=(size, size), xy_overlap=(0.5, 0.5))
-
-    hot_windows = search_windows(image, windows, svc, X_scaler, parameter_tuning_dict)
-
-    window_img = draw_boxes(draw_image, hot_windows, color=(0, 0, 255), thick=6)
-
-    plt.imshow(window_img)
-    plt.show()
