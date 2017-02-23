@@ -5,17 +5,6 @@ import pickle
 import cv2
 from scipy.ndimage.measurements import label
 
-'''# Read in a pickle file with bboxes saved
-# Each item in the "all_bboxes" list will contain a
-# list of boxes for one of the images shown above
-box_list = pickle.load(open("bbox_pickle.p", "rb"))
-
-# Read in image similar to one shown above
-image = mpimg.imread('test_image.jpg')
-
-# Create a heat map of zeros(single channel)
-heat = np.zeros_like(image[:,:,0]).astype(np.float)'''
-
 def add_heat(heatmap, bbox_list):
     # Iterate through list of bboxes
     for box in bbox_list:
@@ -51,26 +40,3 @@ def draw_labeled_bboxes(img, labels):
 
     # Return the image
     return img
-
-'''# Add heat to each box in box list
-heat = add_heat(heat, box_list)
-
-# Apply threshold to help remove false positives
-heat = apply_threshold(heat, 2)
-
-# Visualize the heatmap when displaying
-# NOTE: Limit the values from 0<->255
-heatmap = np.clip(heat, 0, 255)
-
-# Find final boxes from heatmap using label function
-labels = label(heatmap)
-draw_img = draw_labeled_bboxes(np.copy(image), labels)
-
-fig = plt.figure()
-plt.subplot(121)
-plt.imshow(heatmap, cmap='hot')
-plt.title('Heat Map')
-plt.subplot(122)
-plt.imshow(draw_img)
-plt.title('Car Positions')
-fig.tight_layout()'''
