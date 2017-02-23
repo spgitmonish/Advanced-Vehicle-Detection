@@ -104,7 +104,7 @@ def pipelineVideo(image):
         heat = add_heat(heat, box_list)
 
         # Apply threshold to help remove false positives
-        heat = apply_threshold(heat, 3)
+        heat = apply_threshold(heat, 5)
 
         # Visualize the heatmap when displaying
         # NOTE: Limit the values from 0<->255
@@ -135,16 +135,20 @@ if debugRun == 1:
     detected_fifo_threshold = 5
 
     # Video to test on
+    project_output = 'project_video_snippets/test1_output.mp4'
+    project_clip = VideoFileClip("project_video_snippets/test1.mp4")
+    project_clip = project_clip.fl_image(pipelineVideo)
+    project_clip.write_videofile(project_output, audio=False)
+
     '''project_output = 'project_video_output.mp4'
     project_clip = VideoFileClip("project_video.mp4")
     project_clip = project_clip.fl_image(pipelineVideo)
     project_clip.write_videofile(project_output, audio=False)'''
 
-    project_output = 'test_video_output.mp4'
+    '''project_output = 'test_video_output.mp4'
     project_clip = VideoFileClip("test_video.mp4")
     project_clip = project_clip.fl_image(pipelineVideo)
-    project_clip.write_videofile(project_output, audio=False)
-
+    project_clip.write_videofile(project_output, audio=False)'''
 # Heat Map based on limit HOG search of an image
 if debugRun == 2:
     # Call function which classifies images and returns the model and the
