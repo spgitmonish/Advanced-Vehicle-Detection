@@ -192,22 +192,67 @@ if debugRun == 1:
 
 if debugRun == 2:
     # Video Images
-    #video_files = glob2.glob("video_images/*.jpg")
-    video_files = glob2.glob("video_images/FC740.jpg")
+    video_files = glob2.glob("video_images/*.jpg")
     box_list = None
 
     for file in video_files:
        # Read the image
        image = mpimg.imread(file)
+
+       # Copy of the image to draw on
+       draw_image = np.copy(image)
+
+       # To display boxes for debug
+       display_boxes = False
+
+       # The area in focus
        ystart = 400
        ystop = 656
 
-       #scales = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0]
-       scales = [1.0]
+       scales = [0.75, 1.0]
+       #scales = [1.0]
 
        for scale in scales:
-           out_img = find_cars(image, ystart, ystop, scale,
-                               svc, X_scaler, parameter_tuning_dict)
-           plt.imshow(out_img)
-           plt.title("File: " + str(file) + " Scale: " + str(scale))
-           plt.show()
+           detected_windows = find_cars(image, ystart, ystop, scale,
+                                        svc, X_scaler, parameter_tuning_dict)
+
+           if display_boxes == True:
+               window_img = draw_boxes(draw_image, detected_windows,
+                                       color=(0, 0, 255), thick=6)
+
+               plt.imshow(window_img)
+               plt.title("File: " + str(file) + " Scale: " + str(scale))
+               plt.show()
+
+           # Stack the hot windows verically
+           if box_list == None:
+               box_list = detected_windows
+           else:
+               box_list.extend(detected_windows)
+
+    # Image for adding heat(use the last image)
+    heat = np.zeros_like(image[:,:,0]).astype(np.float)
+
+    # Add heat to each box in box list
+    heat = add_heat(heat, box_list)
+
+    # Apply threshold to help remove false positives
+    heat = apply_threshold(heat, 7)
+
+    # Visualize the heatmap when displaying
+    # NOTE: Limit the values from 0<->255
+    heatmap = np.clip(heat, 0, 255)
+
+    # Find final boxes from heatmap using label function
+    labels = label(heatmap)
+    draw_img = draw_labeled_bboxes(np.copy(image), labels)
+
+    fig = plt.figure()
+    plt.subplot(121)
+    plt.imshow(heatmap, cmap='hot')
+    plt.title('Heat Map')
+    plt.subplot(122)
+    plt.imshow(draw_img)
+    plt.title('Car Positions')
+    fig.tight_layout()
+    plt.show()

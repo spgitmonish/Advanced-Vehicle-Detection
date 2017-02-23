@@ -75,6 +75,9 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, parameter_tuning_dict, d
     hog2 = get_hog_features(ch2, orient, pix_per_cell, cell_per_block, feature_vec=False)
     hog3 = get_hog_features(ch3, orient, pix_per_cell, cell_per_block, feature_vec=False)
 
+    # List of detected windows
+    window_list = []
+
     for xb in range(nxsteps):
         for yb in range(nysteps):
             ypos = yb*cells_per_step
@@ -98,13 +101,18 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, parameter_tuning_dict, d
 
             # Scale features and make a prediction
             test_features = X_scaler.transform(np.hstack((spatial_features, hist_features, hog_features)).reshape(1, -1))
-            #test_features = X_scaler.transform(np.hstack((shape_feat, hist_feat)).reshape(1, -1))
             test_prediction = svc.predict(test_features)
 
             if test_prediction == 1:
-                xbox_left = np.int(xleft*scale)
-                ytop_draw = np.int(ytop*scale)
-                win_draw = np.int(window*scale)
-                cv2.rectangle(draw_img,(xbox_left, ytop_draw+ystart),(xbox_left+win_draw,ytop_draw+win_draw+ystart),(0,0,255),6)
+                # Calculate window position and append to the list
+                # NOTE 1 : The y offset also needs to be factored in.
+                # NOTE 2 : The scaling needs to be factored in here
+                startx = np.int(xleft*scale)
+                endx = np.int(xleft*scale + window*scale)
+                starty = np.int(ytop*scale + ystart)
+                endy = np.int(ytop*scale + window*scale + ystart)
 
-    return draw_img
+                # Append window position to list
+                window_list.append(((startx, starty), (endx, endy)))
+
+    return window_list
