@@ -157,7 +157,7 @@ heat = np.zeros_like(image[:,:,0]).astype(np.float)
 heat = add_heat(heat, box_list)
 
 # Apply threshold to help remove false positives
-heat = apply_threshold(heat, 2)
+heat = apply_threshold(heat, 7)
 
 # Visualize the heatmap when displaying
 # NOTE: Limit the values from 0<->255
