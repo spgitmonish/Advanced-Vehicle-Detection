@@ -230,29 +230,33 @@ if debugRun == 2:
            else:
                box_list.extend(detected_windows)
 
-    # Image for adding heat(use the last image)
-    heat = np.zeros_like(image[:,:,0]).astype(np.float)
+    # Video Images
+    video_files = glob2.glob("video_images/*.jpg")
 
-    # Add heat to each box in box list
-    heat = add_heat(heat, box_list)
+    for file in video_files:
+        # Image for adding heat(use the last image)
+        heat = np.zeros_like(image[:,:,0]).astype(np.float)
 
-    # Apply threshold to help remove false positives
-    heat = apply_threshold(heat, 7)
+        # Add heat to each box in box list
+        heat = add_heat(heat, box_list)
 
-    # Visualize the heatmap when displaying
-    # NOTE: Limit the values from 0<->255
-    heatmap = np.clip(heat, 0, 255)
+        # Apply threshold to help remove false positives
+        heat = apply_threshold(heat, 7)
 
-    # Find final boxes from heatmap using label function
-    labels = label(heatmap)
-    draw_img = draw_labeled_bboxes(np.copy(image), labels)
+        # Visualize the heatmap when displaying
+        # NOTE: Limit the values from 0<->255
+        heatmap = np.clip(heat, 0, 255)
 
-    fig = plt.figure()
-    plt.subplot(121)
-    plt.imshow(heatmap, cmap='hot')
-    plt.title('Heat Map')
-    plt.subplot(122)
-    plt.imshow(draw_img)
-    plt.title('Car Positions')
-    fig.tight_layout()
-    plt.show()
+        # Find final boxes from heatmap using label function
+        labels = label(heatmap)
+        draw_img = draw_labeled_bboxes(np.copy(image), labels)
+
+        fig = plt.figure()
+        plt.subplot(121)
+        plt.imshow(heatmap, cmap='hot')
+        plt.title('Heat Map')
+        plt.subplot(122)
+        plt.imshow(draw_img)
+        plt.title('Car Positions of: ' + str(file))
+        fig.tight_layout()
+        plt.show()
