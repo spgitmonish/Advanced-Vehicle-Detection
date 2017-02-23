@@ -70,7 +70,7 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, parameter_tuning_dict, d
         print("Y Steps: ", nysteps)
         print()
 
-    # Compute individual channel HOG features for the entire image
+    # Compute individual channel HOG features of the entire image
     hog1 = get_hog_features(ch1, orient, pix_per_cell, cell_per_block, feature_vec=False)
     hog2 = get_hog_features(ch2, orient, pix_per_cell, cell_per_block, feature_vec=False)
     hog3 = get_hog_features(ch3, orient, pix_per_cell, cell_per_block, feature_vec=False)
@@ -83,19 +83,21 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, parameter_tuning_dict, d
             ypos = yb*cells_per_step
             xpos = xb*cells_per_step
 
-            # Extract HOG for this patch
+            # Extract HOG of each channel for this window
             hog_feat1 = hog1[ypos:ypos+nblocks_per_window, xpos:xpos+nblocks_per_window].ravel()
             hog_feat2 = hog2[ypos:ypos+nblocks_per_window, xpos:xpos+nblocks_per_window].ravel()
             hog_feat3 = hog3[ypos:ypos+nblocks_per_window, xpos:xpos+nblocks_per_window].ravel()
+            # Horizontally stack the HOG of all the channels
             hog_features = np.hstack((hog_feat1, hog_feat2, hog_feat3))
 
+            # Get the position of the window/patch
             xleft = xpos*pix_per_cell
             ytop = ypos*pix_per_cell
 
-            # Extract the image patch
+            # Extract the image window
             subimg = cv2.resize(trans_img_to_search[ytop:ytop+window, xleft:xleft+window], (64,64))
 
-            # Get color features
+            # Get color features(spatial and histogram)
             spatial_features = bin_spatial(subimg, size=spatial_size)
             hist_features = color_hist(subimg, nbins=hist_bins)
 
@@ -103,6 +105,8 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, parameter_tuning_dict, d
             test_features = X_scaler.transform(np.hstack((spatial_features, hist_features, hog_features)).reshape(1, -1))
             test_prediction = svc.predict(test_features)
 
+            # Check if the prediction is accurate, if it is then add it to the
+            # the list of detected windows
             if test_prediction == 1:
                 # Calculate window position and append to the list
                 # NOTE 1 : The y offset also needs to be factored in.
