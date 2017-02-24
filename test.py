@@ -1,4 +1,5 @@
 # All other necessary modules
+import matplotlib
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import numpy as np
@@ -20,10 +21,13 @@ from classify_images import *
 # Import movie editor files
 from moviepy.editor import VideoFileClip
 
+# Using this for better control over plt.show() images on Mac
+matplotlib.use('TKAgg')
+
 # Dictionary for all the parameters which can be tuned/changed
 global parameter_tuning_dict
 parameter_tuning_dict = {
-    'color_space' : 'YCrCb', # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
+    'color_space' : 'Lab', # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
     'orient' : 9, # HOG orientations
     'pix_per_cell' : 8, # HOG pixels per cell
     'cell_per_block' : 2, # HOG cells per block
@@ -38,6 +42,7 @@ parameter_tuning_dict = {
 def pipelineVideo(image):
     # The following are global variables which are defined in the caller
     global box_list
+    global list_of_box_list
     global detected_fifo_threshold_count
     global detected_fifo_threshold
 
@@ -61,42 +66,42 @@ def pipelineVideo(image):
     for scale in scales:
         detected_windows = find_cars(image, ystart, ystop, scale,
                                      svc, X_scaler, parameter_tuning_dict)
-        # This means that there is no car in the picture, remove all the entries
-        # in the FIFO because we don't want any false detections based on the
-        # old FIFO entries
-        if not detected_windows:
-            # Set the boxes list to None
-            box_list = None
-
-            # Reset the detected_fifo_threshold_count to 0
-            detected_fifo_threshold_count = 0
-        else:
+        if detected_windows:
             # Stack the windows detected
             if box_list == None:
                 # This is the first detected window build up the FIFO
                 box_list = detected_windows
+                list_of_box_list.append(detected_windows)
             else:
                 # FIFO threshold hasn't been reached yet, add the detected
                 # windows to the FIFO
                 if detected_fifo_threshold_count < detected_fifo_threshold:
-                    detected_fifo_threshold_count = detected_fifo_threshold_count + 1
                     box_list.extend(detected_windows)
+                    list_of_box_list.append(detected_windows)
                 else:
                     # Threshold is reached, if so then remove the oldest
-                    # entry in the FIFO and then add the newest entry
-                    box_list.pop()
+                    # set of entries in the FIFO and then add the newest entry
+                    oldest_box_list = list_of_box_list.pop(-1)
+                    box_list.pop(len(oldest_box_list))
+
+                    # Add the newest set of boxes detected to both lists
                     box_list.extend(detected_windows)
+                    list_of_box_list.append(detected_windows)
 
-        if display_boxes == True:
-            window_img = draw_boxes(draw_image, detected_windows,
-                                    color=(0, 0, 255), thick=6)
+                if display_boxes == True:
+                    window_img = draw_boxes(draw_image, detected_windows,
+                                            color=(0, 0, 255), thick=6)
 
-            plt.imshow(window_img)
-            plt.show()
+                    plt.imshow(window_img)
+                    plt.show()
+
+            # Increment the count
+            detected_fifo_threshold_count = detected_fifo_threshold_count + 1
+
 
     # Threshold has been reached, use the existing list of boxes, create a
     # heat map and then add windows around the vehicles
-    if detected_fifo_threshold_count == detected_fifo_threshold:
+    if detected_fifo_threshold_count >= detected_fifo_threshold:
         # Image for adding heat(use the last image)
         heat = np.zeros_like(image[:,:,0]).astype(np.float)
 
@@ -104,7 +109,7 @@ def pipelineVideo(image):
         heat = add_heat(heat, box_list)
 
         # Apply threshold to help remove false positives
-        heat = apply_threshold(heat, 5)
+        heat = apply_threshold(heat, 10)
 
         # Visualize the heatmap when displaying
         # NOTE: Limit the values from 0<->255
@@ -113,6 +118,17 @@ def pipelineVideo(image):
         # Find final boxes from heatmap using label function
         labels = label(heatmap)
         draw_image = draw_labeled_bboxes(np.copy(image), labels)
+
+        if display_boxes == True:
+            fig = plt.figure()
+            plt.subplot(121)
+            plt.imshow(heatmap, cmap='hot')
+            plt.title('Heat Map')
+            plt.subplot(122)
+            plt.imshow(draw_image)
+            plt.title('Car Positions')
+            fig.tight_layout()
+            plt.show()
 
     # Return the original image if no detections were found or the modified
     # image with boxes around the vehicles(based on the heat map)
@@ -127,16 +143,39 @@ if debugRun == 1:
     # scaler object fit for car and not-car images
     svc, X_scaler = classify_images(parameter_tuning_dict)
 
-    # List of boxes to store images on
+    # List of boxe
     box_list = None
+    list_of_box_list = []
+
     # Counter for counting FIFO
     detected_fifo_threshold_count = 0
+
     # Threshold for FIFO depop and repop
-    detected_fifo_threshold = 5
+    detected_fifo_threshold = 3
 
     # Video to test on
     project_output = 'project_video_snippets/test1_output.mp4'
     project_clip = VideoFileClip("project_video_snippets/test1.mp4")
+    project_clip = project_clip.fl_image(pipelineVideo)
+    project_clip.write_videofile(project_output, audio=False)
+
+    project_output = 'project_video_snippets/test2_output.mp4'
+    project_clip = VideoFileClip("project_video_snippets/test2.mp4")
+    project_clip = project_clip.fl_image(pipelineVideo)
+    project_clip.write_videofile(project_output, audio=False)
+
+    project_output = 'project_video_snippets/test3_output.mp4'
+    project_clip = VideoFileClip("project_video_snippets/test3.mp4")
+    project_clip = project_clip.fl_image(pipelineVideo)
+    project_clip.write_videofile(project_output, audio=False)
+
+    project_output = 'project_video_snippets/test4_output.mp4'
+    project_clip = VideoFileClip("project_video_snippets/test4.mp4")
+    project_clip = project_clip.fl_image(pipelineVideo)
+    project_clip.write_videofile(project_output, audio=False)
+
+    project_output = 'project_video_snippets/test5_output.mp4'
+    project_clip = VideoFileClip("project_video_snippets/test5.mp4")
     project_clip = project_clip.fl_image(pipelineVideo)
     project_clip.write_videofile(project_output, audio=False)
 
@@ -149,8 +188,41 @@ if debugRun == 1:
     project_clip = VideoFileClip("test_video.mp4")
     project_clip = project_clip.fl_image(pipelineVideo)
     project_clip.write_videofile(project_output, audio=False)'''
-# Heat Map based on limit HOG search of an image
+# Heat Map based on limit HOG search of the video frames
 if debugRun == 2:
+    # Call function which classifies images and returns the model and the
+    # scaler object fit for car and not-car images
+    svc, X_scaler = classify_images(parameter_tuning_dict)
+
+    # List of boxes
+    box_list = None
+    list_of_box_list = []
+
+    # Counter for counting FIFO
+    detected_fifo_threshold_count = 0
+
+    # Threshold for FIFO depop and repop
+    detected_fifo_threshold = 3
+
+    # Video Images
+    video_files = glob2.glob("all_video_images/*.jpg")
+
+    # Sort the files based on the number
+    # i.e. strip first 19 and last 4 characters
+    # Example: all_video_images/FC1.jpg
+    video_files = sorted(video_files, key=lambda name: int(name[19:-4]))
+
+    # Parse each image
+    for idx, fname in enumerate(video_files):
+        if idx > 180:
+            # Read image
+            image = misc.imread(fname)
+
+            # Pass to the pipeline
+            pipelineVideo(image)
+
+# Heat Map based on limit HOG search of an image
+if debugRun == 3:
     # Call function which classifies images and returns the model and the
     # scaler object fit for car and not-car images
     svc, X_scaler = classify_images(parameter_tuning_dict)
@@ -225,7 +297,7 @@ if debugRun == 2:
         fig.tight_layout()
         plt.show()
 # Heat Map based on HOG seach of the entire image
-if debugRun == 3:
+if debugRun == 4:
     # Video Images
     video_files = glob2.glob("video_images/*.jpg")
     box_list = None
