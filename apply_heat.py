@@ -6,6 +6,7 @@ import cv2
 from scipy.ndimage.measurements import label
 
 def add_heat(heatmap, bbox_list):
+    # Here might lie the entire logic
     # Iterate through list of bboxes
     for box in bbox_list:
         # Add += 1 for all pixels inside each bbox
