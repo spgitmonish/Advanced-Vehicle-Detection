@@ -38,6 +38,7 @@ parameter_tuning_dict = {
 def pipelineVideo(image):
     # The following are global variables which are defined in the caller
     global box_list
+    global list_of_box_list
     global detected_fifo_threshold_count
     global detected_fifo_threshold
 
@@ -49,7 +50,7 @@ def pipelineVideo(image):
     draw_image = np.copy(image)
 
     # To display boxes for debug
-    display_boxes = False
+    display_boxes = True
 
     # The area in focus
     ystart = 400
@@ -64,28 +65,20 @@ def pipelineVideo(image):
         # This means that there is no car in the picture, remove all the entries
         # in the FIFO because we don't want any false detections based on the
         # old FIFO entries
-        if not detected_windows:
-            # Set the boxes list to None
-            box_list = None
-
-            # Reset the detected_fifo_threshold_count to 0
-            detected_fifo_threshold_count = 0
-        else:
+        if detected_windows:
             # Stack the windows detected
             if box_list == None:
                 # This is the first detected window build up the FIFO
                 box_list = detected_windows
+                list_of_box_list.append(detected_windows)
             else:
                 # FIFO threshold hasn't been reached yet, add the detected
                 # windows to the FIFO
                 if detected_fifo_threshold_count < detected_fifo_threshold:
                     detected_fifo_threshold_count = detected_fifo_threshold_count + 1
-                    box_list.extend(detected_windows)
-                else:
-                    # Threshold is reached, if so then remove the oldest
-                    # entry in the FIFO and then add the newest entry
-                    box_list.pop()
-                    box_list.extend(detected_windows)
+
+                box_list.extend(detected_windows)
+                list_of_box_list.append(detected_windows)
 
         if display_boxes == True:
             window_img = draw_boxes(draw_image, detected_windows,
@@ -104,7 +97,7 @@ def pipelineVideo(image):
         heat = add_heat(heat, box_list)
 
         # Apply threshold to help remove false positives
-        heat = apply_threshold(heat, 5)
+        heat = apply_threshold(heat, 10)
 
         # Visualize the heatmap when displaying
         # NOTE: Limit the values from 0<->255
@@ -114,12 +107,22 @@ def pipelineVideo(image):
         labels = label(heatmap)
         draw_image = draw_labeled_bboxes(np.copy(image), labels)
 
+        if display_boxes == True:
+            fig = plt.figure()
+            plt.subplot(121)
+            plt.imshow(heatmap, cmap='hot')
+            plt.title('Heat Map')
+            plt.subplot(122)
+            plt.imshow(draw_image)
+            plt.title('Car Positions')
+            plt.show()
+
     # Return the original image if no detections were found or the modified
     # image with boxes around the vehicles(based on the heat map)
     return draw_image
 
 # Selects which path to run
-debugRun = 1
+debugRun = 2
 
 # Heat Map based on limit HOG search of the video
 if debugRun == 1:
@@ -129,10 +132,11 @@ if debugRun == 1:
 
     # List of boxes to store images on
     box_list = None
+    list_of_box_list = []
     # Counter for counting FIFO
     detected_fifo_threshold_count = 0
     # Threshold for FIFO depop and repop
-    detected_fifo_threshold = 5
+    detected_fifo_threshold = 3
 
     # Video to test on
     project_output = 'project_video_snippets/test1_output.mp4'
@@ -149,8 +153,39 @@ if debugRun == 1:
     project_clip = VideoFileClip("test_video.mp4")
     project_clip = project_clip.fl_image(pipelineVideo)
     project_clip.write_videofile(project_output, audio=False)'''
-# Heat Map based on limit HOG search of an image
 if debugRun == 2:
+    # Call function which classifies images and returns the model and the
+    # scaler object fit for car and not-car images
+    svc, X_scaler = classify_images(parameter_tuning_dict)
+
+    # List of boxes
+    box_list = None
+    list_of_box_list = []
+
+    # Counter for counting FIFO
+    detected_fifo_threshold_count = 0
+
+    # Threshold for FIFO depop and repop
+    detected_fifo_threshold = 3
+
+    # Video Images
+    video_files = glob2.glob("all_video_images/*.jpg")
+
+    # Sort the files based on the number
+    # i.e. strip first 19 and last 4 characters
+    # Example: all_video_images/FC1.jpg
+    video_files = sorted(video_files, key=lambda name: int(name[19:-4]))
+
+    # Parse each image
+    for idx, fname in enumerate(video_files):
+        if idx > 180:
+            # Read image
+            image = misc.imread(fname)
+
+            # Pass to the pipeline
+            pipelineVideo(image)
+# Heat Map based on limit HOG search of an image
+if debugRun == 3:
     # Call function which classifies images and returns the model and the
     # scaler object fit for car and not-car images
     svc, X_scaler = classify_images(parameter_tuning_dict)
