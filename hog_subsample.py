@@ -15,7 +15,7 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, parameter_tuning_dict, d
     # Get the area in focus and convert that area from RGB to YCrCb, since
     # the model was optimized for that image format
     img_to_search = img[ystart:ystop,:,:]
-    trans_img_to_search = cv2.cvtColor(img_to_search, cv2.COLOR_RGB2Lab)
+    trans_img_to_search = cv2.cvtColor(img_to_search, cv2.COLOR_RGB2YCrCb)
 
     # The idea with this section is to make sure that the scale of the window
     # is accounted for in the stepping algorithm below. The algorithm doesn't
