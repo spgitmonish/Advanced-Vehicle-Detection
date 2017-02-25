@@ -24,7 +24,7 @@ def apply_threshold(heatmap, threshold):
     # Return thresholded map
     return heatmap
 
-def draw_labeled_bboxes(img, labels, mass_center):
+def draw_labeled_bboxes(img, labels):
     boxes_list = []
     debug = False
     not_enhanced = False
@@ -95,7 +95,7 @@ def draw_labeled_bboxes(img, labels, mass_center):
                 if boxes_checked_list[comparison_index] == 0:
                     # 1. Check if x1 of Box2 is very close to x2 of Box1
                     # 2. Check if y2 of both boxes are in the same area
-                    if((abs(box_2[0][0] - box_1[1][0]) <= 20) and
+                    if((abs(box_2[0][0] - box_1[1][0]) <= 40) and
                        (abs(box_1[1][1] - box_2[1][1]) <= 75)):
 
                         # Mark that Box2 has been compared already
@@ -115,7 +115,7 @@ def draw_labeled_bboxes(img, labels, mass_center):
 
                     # 1. Check if y1 of Box2 is very close to y2 of Box1
                     # 2. Check if x2 of both boxes are in the same area
-                    if((abs(box_2[0][1] - box_1[1][1]) <= 20) and
+                    if((abs(box_2[0][1] - box_1[1][1]) <= 40) and
                        (abs(box_1[1][0] - box_2[1][0]) <= 75)):
 
                         # Mark that Box2 has been compared already

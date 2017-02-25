@@ -40,10 +40,9 @@ parameter_tuning_dict = {
 def pipelineVideo(image):
     # The following are global variables which are defined in the caller
     global list_of_boxes_list
-
-    # Call function which classifies images and returns the model and the
-    # scaler object fit for car and not-car images
-    svc, X_scaler = classify_images(parameter_tuning_dict)
+    global frame_count
+    global svc
+    global X_scaler
 
     # Copy of the image to draw on
     draw_image = np.copy(image)
@@ -55,33 +54,37 @@ def pipelineVideo(image):
     ystart = 400
     ystop = 656
 
-    scales = [0.6, 0.75, 1.0]
+    #scales = [0.6, 0.75, 1.0]
+    scales = [0.75, 1.0]
     #scales = [0.6, 0.7, 0.8, 0.9, 1.0]
     #scales = [1.0]
 
-    for scale in scales:
-        detected_windows = find_cars(image, ystart, ystop, scale,
-                                     svc, X_scaler, parameter_tuning_dict)
-        # This means that there is no car in the picture, remove all the entries
-        # in the FIFO because we don't want any false detections based on the
-        # old FIFO entries
-        if detected_windows:
-            # Append the latest window detected to the
-            list_of_boxes_list.append(detected_windows)
-            if len(list_of_boxes_list) > len(scales):
-                # Pop the oldest entry to keep the list fresh
-                list_of_boxes_list.pop(0)
-        else:
-            if list_of_boxes_list:
-                # Pop the oldest entry
-                list_of_boxes_list.pop(0)
+    # This code can be modified to process every other frame instead of just
+    # one frame at a time(which can be very time consuming)
+    if frame_count % 1 == 0:
+        for scale in scales:
+            detected_windows = find_cars(image, ystart, ystop, scale,
+                                         svc, X_scaler, parameter_tuning_dict)
+            # This means that there is no car in the picture, remove all the entries
+            # in the FIFO because we don't want any false detections based on the
+            # old FIFO entries
+            if detected_windows:
+                # Append the latest window detected to the
+                list_of_boxes_list.append(detected_windows)
+                if len(list_of_boxes_list) > len(scales):
+                    # Pop the oldest entry to keep the list fresh
+                    list_of_boxes_list.pop(0)
+            else:
+                if list_of_boxes_list:
+                    # Pop the oldest entry
+                    list_of_boxes_list.pop(0)
 
-        if display_boxes == True and 0:
-            window_img = draw_boxes(draw_image, detected_windows,
-                                    color=(0, 0, 255), thick=6)
+            if display_boxes == True and 0:
+                window_img = draw_boxes(draw_image, detected_windows,
+                                        color=(0, 0, 255), thick=6)
 
-            plt.imshow(window_img)
-            plt.show()
+                plt.imshow(window_img)
+                plt.show()
 
     # Threshold has been reached, use the existing list of boxes, create a
     # heat map and then add windows around the vehicles
@@ -103,8 +106,7 @@ def pipelineVideo(image):
         labels = label(heatmap)
 
         # Find the center of mass for the labels generated
-        mass_center = center_of_mass(heatmap, labels[0], list(range(1, labels[1] + 1)))
-        draw_image = draw_labeled_bboxes(np.copy(image), labels, mass_center)
+        draw_image = draw_labeled_bboxes(np.copy(image), labels)
 
         if display_boxes == True:
             fig = plt.figure()
@@ -115,6 +117,9 @@ def pipelineVideo(image):
             plt.imshow(draw_image)
             plt.title('Car Positions')
             plt.show()
+
+    # Increment frame count
+    frame_count = frame_count + 1
 
     # Return the original image if no detections were found or the modified
     # image with boxes around the vehicles(based on the heat map)
@@ -132,6 +137,9 @@ if debugRun == 1:
     # List of boxes
     list_of_boxes_list = []
 
+    # Global count to skip frames to reduce processing time
+    frame_count = 0
+
     # Video to test on
     '''project_output = 'project_video_snippets/test1_output.mp4'
     project_clip = VideoFileClip("project_video_snippets/test1.mp4")
@@ -141,7 +149,7 @@ if debugRun == 1:
     project_output = 'project_video_snippets/test2_output.mp4'
     project_clip = VideoFileClip("project_video_snippets/test2.mp4")
     project_clip = project_clip.fl_image(pipelineVideo)
-    project_clip.write_videofile(project_output, audio=False)'''
+    project_clip.write_videofile(project_output, audio=False)
 
     project_output = 'project_video_snippets/test3_output.mp4'
     project_clip = VideoFileClip("project_video_snippets/test3.mp4")
@@ -153,7 +161,7 @@ if debugRun == 1:
     project_clip = project_clip.fl_image(pipelineVideo)
     project_clip.write_videofile(project_output, audio=False)
 
-    '''project_output = 'project_video_snippets/test5_output.mp4'
+    project_output = 'project_video_snippets/test5_output.mp4'
     project_clip = VideoFileClip("project_video_snippets/test5.mp4")
     project_clip = project_clip.fl_image(pipelineVideo)
     project_clip.write_videofile(project_output, audio=False)'''
@@ -163,10 +171,10 @@ if debugRun == 1:
     project_clip = project_clip.fl_image(pipelineVideo)
     project_clip.write_videofile(project_output, audio=False)'''
 
-    '''project_output = 'project_video_output.mp4'
+    project_output = 'project_video_output.mp4'
     project_clip = VideoFileClip("project_video.mp4")
     project_clip = project_clip.fl_image(pipelineVideo)
-    project_clip.write_videofile(project_output, audio=False)'''
+    project_clip.write_videofile(project_output, audio=False)
 
     '''project_output = 'test_video_output.mp4'
     project_clip = VideoFileClip("test_video.mp4")
