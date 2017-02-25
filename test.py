@@ -54,8 +54,8 @@ def pipelineVideo(image):
     ystart = 400
     ystop = 656
 
-    #scales = [0.6, 0.75, 1.0]
-    scales = [0.75, 1.0]
+    scales = [0.6, 0.75, 1.0]
+    #scales = [0.75, 1.0]
     #scales = [0.6, 0.7, 0.8, 0.9, 1.0]
     #scales = [1.0]
 
@@ -71,7 +71,7 @@ def pipelineVideo(image):
             if detected_windows:
                 # Append the latest window detected to the
                 list_of_boxes_list.append(detected_windows)
-                if len(list_of_boxes_list) > len(scales):
+                if len(list_of_boxes_list) > 4:
                     # Pop the oldest entry to keep the list fresh
                     list_of_boxes_list.pop(0)
             else:
@@ -88,7 +88,7 @@ def pipelineVideo(image):
 
     # Threshold has been reached, use the existing list of boxes, create a
     # heat map and then add windows around the vehicles
-    if len(list_of_boxes_list) >= len(scales):
+    if len(list_of_boxes_list) >= 4:
         # Image for adding heat(use the last image)
         heat = np.zeros_like(image[:,:,0]).astype(np.float)
 
