@@ -72,8 +72,9 @@ def pipelineVideo(image):
                 # Pop the oldest entry to keep the list fresh
                 list_of_boxes_list.pop(0)
         else:
-            # Pop the oldest entry
-            list_of_boxes_list.pop(0)
+            if list_of_boxes_list:
+                # Pop the oldest entry
+                list_of_boxes_list.pop(0)
 
         if display_boxes == True:
             window_img = draw_boxes(draw_image, detected_windows,
@@ -102,13 +103,8 @@ def pipelineVideo(image):
         labels = label(heatmap)
 
         # Find the center of mass for the labels generated
-        if labels[1] == 1:
-            mass_center = center_of_mass(heatmap, labels[0], [1])
-        elif labels[1] == 2:
-            mass_center = center_of_mass(heatmap, labels[0], [1, 2])
-        elif labels[1] == 3:
-            mass_center = center_of_mass(heatmap, labels[0], [1, 2, 3])
-        print("Center of Mass:", mass_center)
+        mass_center = center_of_mass(heatmap, labels[0], list(range(1, labels[1] + 1)))
+        #print("Center of Mass:", mass_center)
 
         draw_image = draw_labeled_bboxes(np.copy(image), labels, mass_center)
 
@@ -139,10 +135,35 @@ if debugRun == 1:
     list_of_boxes_list = []
 
     # Video to test on
-    project_output = 'project_video_snippets/test6_output.mp4'
-    project_clip = VideoFileClip("project_video_snippets/test6.mp4")
+    project_output = 'project_video_snippets/test1_output.mp4'
+    project_clip = VideoFileClip("project_video_snippets/test1.mp4")
     project_clip = project_clip.fl_image(pipelineVideo)
     project_clip.write_videofile(project_output, audio=False)
+
+    project_output = 'project_video_snippets/test2_output.mp4'
+    project_clip = VideoFileClip("project_video_snippets/test2.mp4")
+    project_clip = project_clip.fl_image(pipelineVideo)
+    project_clip.write_videofile(project_output, audio=False)
+
+    project_output = 'project_video_snippets/test3_output.mp4'
+    project_clip = VideoFileClip("project_video_snippets/test3.mp4")
+    project_clip = project_clip.fl_image(pipelineVideo)
+    project_clip.write_videofile(project_output, audio=False)
+
+    project_output = 'project_video_snippets/test4_output.mp4'
+    project_clip = VideoFileClip("project_video_snippets/test4.mp4")
+    project_clip = project_clip.fl_image(pipelineVideo)
+    project_clip.write_videofile(project_output, audio=False)
+
+    project_output = 'project_video_snippets/test5_output.mp4'
+    project_clip = VideoFileClip("project_video_snippets/test5.mp4")
+    project_clip = project_clip.fl_image(pipelineVideo)
+    project_clip.write_videofile(project_output, audio=False)
+
+    '''project_output = 'project_video_snippets/test6_output.mp4'
+    project_clip = VideoFileClip("project_video_snippets/test6.mp4")
+    project_clip = project_clip.fl_image(pipelineVideo)
+    project_clip.write_videofile(project_output, audio=False)'''
 
     '''project_output = 'project_video_output.mp4'
     project_clip = VideoFileClip("project_video.mp4")
