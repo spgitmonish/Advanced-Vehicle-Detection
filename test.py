@@ -55,8 +55,8 @@ def pipelineVideo(image):
     ystart = 400
     ystop = 656
 
-    scales = [0.75, 1.0, 1.25]
-    #scales = [0.8, 0.9, 1.0, 1.1, 1.2]
+    scales = [0.6, 0.75, 1.0]
+    #scales = [0.6, 0.7, 0.8, 0.9, 1.0]
     #scales = [1.0]
 
     for scale in scales:
@@ -76,7 +76,7 @@ def pipelineVideo(image):
                 # Pop the oldest entry
                 list_of_boxes_list.pop(0)
 
-        if display_boxes == True:
+        if display_boxes == True and 0:
             window_img = draw_boxes(draw_image, detected_windows,
                                     color=(0, 0, 255), thick=6)
 
@@ -104,8 +104,6 @@ def pipelineVideo(image):
 
         # Find the center of mass for the labels generated
         mass_center = center_of_mass(heatmap, labels[0], list(range(1, labels[1] + 1)))
-        #print("Center of Mass:", mass_center)
-
         draw_image = draw_labeled_bboxes(np.copy(image), labels, mass_center)
 
         if display_boxes == True:
@@ -135,7 +133,7 @@ if debugRun == 1:
     list_of_boxes_list = []
 
     # Video to test on
-    project_output = 'project_video_snippets/test1_output.mp4'
+    '''project_output = 'project_video_snippets/test1_output.mp4'
     project_clip = VideoFileClip("project_video_snippets/test1.mp4")
     project_clip = project_clip.fl_image(pipelineVideo)
     project_clip.write_videofile(project_output, audio=False)
@@ -143,7 +141,7 @@ if debugRun == 1:
     project_output = 'project_video_snippets/test2_output.mp4'
     project_clip = VideoFileClip("project_video_snippets/test2.mp4")
     project_clip = project_clip.fl_image(pipelineVideo)
-    project_clip.write_videofile(project_output, audio=False)
+    project_clip.write_videofile(project_output, audio=False)'''
 
     project_output = 'project_video_snippets/test3_output.mp4'
     project_clip = VideoFileClip("project_video_snippets/test3.mp4")
@@ -155,13 +153,13 @@ if debugRun == 1:
     project_clip = project_clip.fl_image(pipelineVideo)
     project_clip.write_videofile(project_output, audio=False)
 
-    project_output = 'project_video_snippets/test5_output.mp4'
+    '''project_output = 'project_video_snippets/test5_output.mp4'
     project_clip = VideoFileClip("project_video_snippets/test5.mp4")
     project_clip = project_clip.fl_image(pipelineVideo)
-    project_clip.write_videofile(project_output, audio=False)
+    project_clip.write_videofile(project_output, audio=False)'''
 
-    '''project_output = 'project_video_snippets/test6_output.mp4'
-    project_clip = VideoFileClip("project_video_snippets/test6.mp4")
+    '''project_output = 'project_video_snippets/test3_output.mp4'
+    project_clip = VideoFileClip("project_video_snippets/test3.mp4")
     project_clip = project_clip.fl_image(pipelineVideo)
     project_clip.write_videofile(project_output, audio=False)'''
 
@@ -192,7 +190,7 @@ if debugRun == 2:
 
     # Parse each image
     for idx, fname in enumerate(video_files):
-        if idx > 180:
+        if idx > 685:
             # Read image
             image = misc.imread(fname)
 
