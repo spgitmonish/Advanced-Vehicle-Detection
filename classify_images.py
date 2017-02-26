@@ -30,11 +30,6 @@ def classify_images(parameter_tuning_dict):
         for not_car_image in not_car_images:
             notcars.append(not_car_image)
 
-        # Limit the number of images to 500
-        '''sample_size = 500
-        cars = cars[0:sample_size]
-        notcars = notcars[0:sample_size]'''
-
         # Min and max in y to search in slide_window()
         y_start_stop = [300, 700]
 

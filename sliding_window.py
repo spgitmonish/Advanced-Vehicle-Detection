@@ -4,9 +4,11 @@ import cv2
 
 from extract_features import *
 
-# Define a function you will pass an image
-# and the list of windows to be searched (output of slide_windows())
 def search_windows(img, windows, clf, scaler, parameter_tuning_dict):
+    ''' Function which extracts features of the image passed in using
+        the different window sizes. The function also normalizes the data
+        before prediction and returns the detected window in a list
+    '''
 
     #1) Create an empty list to receive positive detection windows
     detected_windows = []
@@ -32,13 +34,11 @@ def search_windows(img, windows, clf, scaler, parameter_tuning_dict):
     #8) Return windows for positive detections
     return detected_windows
 
-# Define a function that takes an image,
-# start and stop positions in both x and y,
-# window size (x and y dimensions),
-# and overlap fraction (for both x and y)
 def slide_window(img, x_start_stop=[None, None], y_start_stop=[None, None],
                  xy_window=(64, 64), xy_overlap=(0.5, 0.5)):
-    # If x and/or y start/stop positions not defined, set to image size
+    ''' Define a function that takes an image, start and stop positions
+        in both x and y, window size (x and y dimensions),
+        and overlap fraction (for both x and y)'''
     if x_start_stop[0] == None:
         x_start_stop[0] = 0
     if x_start_stop[1] == None:
@@ -66,9 +66,6 @@ def slide_window(img, x_start_stop=[None, None], y_start_stop=[None, None],
     window_list = []
 
     # Loop through finding x and y window positions
-    # Note: you could vectorize this step, but in practice
-    # you'll be considering windows one by one with your
-    # classifier, so looping makes sense
     for ys in range(ny_windows):
         for xs in range(nx_windows):
             # Calculate window position
@@ -85,11 +82,16 @@ def slide_window(img, x_start_stop=[None, None], y_start_stop=[None, None],
 
 # Define a function to draw bounding boxes
 def draw_boxes(img, bboxes, color=(0, 0, 255), thick=6):
+    ''' Draw boxes on the image using the list of boxes
+        which are passed in
+    '''
     # Make a copy of the image
     imcopy = np.copy(img)
+
     # Iterate through the bounding boxes
     for bbox in bboxes:
         # Draw a rectangle given bbox coordinates
         cv2.rectangle(imcopy, bbox[0], bbox[1], color, thick)
+
     # Return the image copy with boxes drawn
     return imcopy

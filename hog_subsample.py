@@ -7,8 +7,12 @@ import cv2
 from hog_features import *
 from spatial_color_features import *
 
-# Define a single function that can extract features using hog sub-sampling and make predictions
-def find_cars(img, ystart, ystop, scale, svc, X_scaler, parameter_tuning_dict, debug=False):
+def find_cars(img, ystart, ystop, scale, svc,
+              X_scaler, parameter_tuning_dict, debug=False):
+    ''' A single function that can extract features using hog sub-sampling and
+        also extracts Histogram of Colors and Spatial Bin of the area specified
+    '''
+
     # Make a copy of the image
     draw_img = np.copy(img)
 
@@ -61,7 +65,7 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, parameter_tuning_dict, d
     # 64 was the orginal sampling rate, with 8 cells and 8 pix per cell
     window = 64
     nblocks_per_window = (window // pix_per_cell)-1
-    cells_per_step = 2  # Instead of overlap, define how many cells to step
+    cells_per_step = 2
     nxsteps = (nxblocks - nblocks_per_window) // cells_per_step
     nysteps = (nyblocks - nblocks_per_window) // cells_per_step
 

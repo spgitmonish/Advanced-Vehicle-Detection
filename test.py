@@ -54,10 +54,8 @@ def pipelineVideo(image):
     ystart = 400
     ystop = 656
 
+    # Window scales
     scales = [0.6, 0.75, 1.0]
-    #scales = [0.75, 1.0]
-    #scales = [0.6, 0.7, 0.8, 0.9, 1.0]
-    #scales = [1.0]
 
     # This code can be modified to process every other frame instead of just
     # one frame at a time(which can be very time consuming)
@@ -65,20 +63,23 @@ def pipelineVideo(image):
         for scale in scales:
             detected_windows = find_cars(image, ystart, ystop, scale,
                                          svc, X_scaler, parameter_tuning_dict)
-            # This means that there is no car in the picture, remove all the entries
-            # in the FIFO because we don't want any false detections based on the
-            # old FIFO entries
+            # Check if there were windows detected in the frame
             if detected_windows:
-                # Append the latest window detected to the
+                # Append the list of detected windows
                 list_of_boxes_list.append(detected_windows)
+
+                # If list of boxes is beyond a threshold then remove the oldest
+                # list of boxes
                 if len(list_of_boxes_list) > 4:
                     # Pop the oldest entry to keep the list fresh
                     list_of_boxes_list.pop(0)
             else:
+                # Still remove the oldest entry
                 if list_of_boxes_list:
                     # Pop the oldest entry
                     list_of_boxes_list.pop(0)
 
+            # Debug to visualize the boxes detected
             if display_boxes == True:
                 window_img = draw_boxes(draw_image, detected_windows,
                                         color=(0, 0, 255), thick=6)
@@ -108,6 +109,7 @@ def pipelineVideo(image):
         # Find the center of mass for the labels generated
         draw_image = draw_labeled_bboxes(np.copy(image), labels)
 
+        # Debug to visualize the heatmap
         if display_boxes == True:
             fig = plt.figure()
             plt.subplot(121)
@@ -135,6 +137,7 @@ list_of_boxes_list = []
 # Global count to skip frames to reduce processing time
 frame_count = 0
 
+# Test the model on a video
 project_output = 'project_video_output.mp4'
 project_clip = VideoFileClip("project_video.mp4")
 project_clip = project_clip.fl_image(pipelineVideo)

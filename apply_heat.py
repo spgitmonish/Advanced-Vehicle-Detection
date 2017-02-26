@@ -5,6 +5,9 @@ import pickle
 import cv2
 
 def add_heat(heatmap, list_of_boxes_list):
+    ''' Add heat to a black image for
+        detected boxes
+    '''
     # Parse the list of boxes and add heat
     for box_list in list_of_boxes_list:
         # Here might lie the entire logic
@@ -18,6 +21,9 @@ def add_heat(heatmap, list_of_boxes_list):
     return heatmap
 
 def apply_threshold(heatmap, threshold):
+    ''' Apply a threshold and reject pixels
+        which are below the threshold
+    '''
     # Zero out pixels below the threshold
     heatmap[heatmap <= threshold] = 0
 
@@ -25,6 +31,14 @@ def apply_threshold(heatmap, threshold):
     return heatmap
 
 def draw_labeled_bboxes(img, labels):
+    ''' Draw bounding boxes centered around
+        hot spots.
+
+        This function also makes sure 
+        that if the hot spots are very close by then
+        some optimization is done to avoid multiple boxes
+        being drawn on the same car
+    '''
     boxes_list = []
     debug = False
     not_enhanced = False

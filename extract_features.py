@@ -6,10 +6,10 @@ from scipy import misc
 from hog_features import *
 from spatial_color_features import *
 
-# Define a function to extract features from a single image window
-# This function is very similar to extract_features()
-# NOTE: just for a single image rather than list of images
 def single_img_features(img, parameter_tuning_dict):
+    ''' Function to extract features from a single image window
+        This function is very similar to extract_features()
+    '''
     #1) Define an empty list to receive features
     img_features = []
 
@@ -29,10 +29,6 @@ def single_img_features(img, parameter_tuning_dict):
             feature_image = cv2.cvtColor(img, cv2.COLOR_RGB2YCrCb)
         elif color_space == 'Lab':
             feature_image = cv2.cvtColor(img, cv2.COLOR_RGB2Lab)
-
-        # The training was done on a scale of 0-1 but cv2.cvtColor
-        # resizes after conversion to 0-255, so convert back
-        #feature_image = feature_image.astype(np.float32)/255
     else:
         # Use the original image format
         feature_image = np.copy(img)
@@ -75,9 +71,11 @@ def single_img_features(img, parameter_tuning_dict):
     #9) Return concatenated array of features
     return np.concatenate(img_features)
 
-# Define a function to extract features from a list of images
-# Have this function call bin_spatial() and color_hist()
 def extract_features(imgs, parameter_tuning_dict):
+    ''' Function to extract features from a list of images
+        The features extracted are HOG, Histogram of Colors
+        and Spatial Bins
+    '''
     # Create a list to append feature vectors to(all images)
     features = []
 
@@ -87,7 +85,6 @@ def extract_features(imgs, parameter_tuning_dict):
         file_features = []
 
         # Read in each one by one
-        #image = mpimg.imread(file)
         image = misc.imread(file)
 
         # Local copy of the color space to be used
@@ -110,15 +107,16 @@ def extract_features(imgs, parameter_tuning_dict):
         else:
             feature_image = np.copy(image)
 
+        # Extract Spatial Bins
         if parameter_tuning_dict['spatial_feat'] == True:
             spatial_features = bin_spatial(feature_image, size=parameter_tuning_dict['spatial_size'])
             file_features.append(spatial_features)
+        # Extract Histogram of Colors
         if parameter_tuning_dict['hist_feat'] == True:
-            # Apply color_hist()
             hist_features = color_hist(feature_image, nbins=parameter_tuning_dict['hist_bins'])
             file_features.append(hist_features)
+        # HOG based on single or all channels
         if parameter_tuning_dict['hog_feat'] == True:
-            # Call get_hog_features() with vis=False, feature_vec=True
             if parameter_tuning_dict['hog_channel'] == 'ALL':
                 hog_features = []
                 for channel in range(feature_image.shape[2]):
