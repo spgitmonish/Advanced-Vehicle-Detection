@@ -8,7 +8,7 @@ Images are usually represented in RGB color space but that is not a true represe
 > Code: extract_features.py
 
 ### 2. Histogram of Colors
-Getting a histogram of colors of an image(in a particular color space) helps distinguishing certain objects like cars from other objects like buildings, roads etc. This type of histogram was used as part of the feature vector of an image for training, testing and prediction. Here is an example of how an histogram of colors of an image looks like.
+Getting a histogram of colors of an image(in a particular color space) helps distinguishing certain objects like cars from other objects like buildings, roads etc. This type of histogram was used as part of the feature vector of an image for training, testing and prediction. I ended up spreading the colors over 32 histogram bins. Here is an example of how an histogram of colors of an image looks like.
 
 > Code: spatial\_color\_features.py
 
@@ -46,7 +46,7 @@ It beautifully describes how HOG works. Although the original intention of HOG w
 > Code: hog_features.py
 
 ## Classification
-For classification I decided to use LinearSVM as it showed high accuracy in the lesson exercises. I stuck with the default parameters when creating a SVM object for training and testing. The dataset used for training and testing has cars and notcars from GTI and KITTI. The images are very small 64x64 and a feature vector combining HOG, Histogram of Colors(HOC) and Spatial Bins is used for training and testing the SVM model. The accuracy I got on my test data using Linear SVM and the combined feature vector was pretty high >99%.
+For classification I decided to use LinearSVM as it showed high accuracy in the lesson exercises. I stuck with the default parameters when creating a SVM object for training and testing. The dataset used for training and testing has cars and not-cars images from GTI and KITTI. The images are very small(64x64 pixels) and a feature vector combining HOG, Histogram of Colors(HOC) and Spatial Bins is used for training and testing the SVM model. The accuracy I got on my test data using Linear SVM and the combined feature vector was pretty high >99%.
 
 > Code: classify_images.py
 
@@ -76,7 +76,7 @@ Applying different window sizes enhances the confidence of prediction because if
 <p align="center">
 
 ## Hot Spots
-One of the things which needs to be avoided is false positives from the previous step. To avoid false positives, I used different window scales, accumulated all the boxes. Then created a heat map to capture where the boxes were detected. Applied a threshold(of 5) to reject boxes which are "cool". This ensured that false positives are rejected when a final bounding box is created to represent the cars in an image(as shown below).
+One of the things which needs to be avoided is false positives from the previous step. To avoid false positives, I used different window scales, accumulated all the boxes. Then created a heat map to capture where the boxes were detected. Applied a threshold(of 5) to reject boxes which were "cooler". This ensured that false positives are rejected when a final bounding box is created to represent the cars in an image(as shown below).
 
 > Code: apply_heat.py
 
@@ -85,10 +85,10 @@ One of the things which needs to be avoided is false positives from the previous
 *Heat Map of Cars*
 <p align="center">
 
-One of the issues I was running into was that for the same car the way the windows were two hot spots in close proximity. This meant my final heatmap to adding boxes around cars algorithm had to be modified to make sure that there was only one bounding box around each car.
+One of the issues I was running into was that for the same car the way the windows were two hot spots in close proximity. This meant my final heatmap-bounding boxes algorithm had to be modified to make sure that there was only one bounding box around each car.
 
 ## Final Result
-Attached are 3 videos with this submission in the "report/FinalVideos" folder. Output of my model on the test_video.mp4, project_video.mp4. The final video is the output combining the advanced lane detection and vehicle detection(LaneAndVehDet.mp4)
+Attached are 3 videos with this submission in the "report/FinalVideos" folder. The oututput of my model on the test\_video.mp4 & project\_video.mp4. The final video is the output combining the advanced lane detection and vehicle detection(LaneAndVehDet.mp4)
 
 ## Discussion
 My algorithm works really great, the false positives are very small and the model does a really good job of identifying and putting a bounding box around the detected cars.
