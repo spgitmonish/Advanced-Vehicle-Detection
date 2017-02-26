@@ -10,9 +10,9 @@ Images are represented in RGB color space but that is not a true representation 
 Getting a histogram of colors of an image(in a particular color space) helps distinguishing certain objects like cars from other objects like buildings, roads etc. This histogram was used as part of the feature vector of an image for training, testing and prediction. Here is an example of how an histogram of colors of an image looks like. 
 
 <p align="center">
-![HOCCar](HOCCar.jpg)    
+![HOCCar](Images/HOCCar.jpg)    
 *Car*           
-![HistOfColors](HistogramOfColors.png)
+![HistOfColors](Images/HistogramOfColors.png)
 <p align="center">
 *Histogram of Colors*
 
@@ -20,9 +20,9 @@ Getting a histogram of colors of an image(in a particular color space) helps dis
 In the lessons we learned about how template matching(comparing pixels) is not accurate as it tends to be too generic. But having the spatial bin representation of the image as part of the feature vector can show improvement in accuracy of classification. Here is an example of how the spatial bins of an YCrCb image looks like.
 
 <p align="center">
-![SpatialBinCar](SpatialBinCar.jpg)    
+![SpatialBinCar](Images/SpatialBinCar.jpg)    
 *Car*           
-![SpatialBinning](SpatialBin.png)
+![SpatialBinning](Images/SpatialBin.png)
 <p align="center">
 *Spatial Binning Of Color*
 
@@ -37,9 +37,9 @@ ADD IMAGES
 For classification I decided to use LinearSVM as it showed high accuracy in the lesson exercises. I stuck with the default parameters when creating a SVM object for training and testing. The dataset used for training and testing has cars and notcars from GTI and KITTI. The images are very small 64x64 and a feature vector combining HOG, Histogram of Colors(HOC) and Spatial Bins is used for training and testing the SVM model. Here are sample images for cars and notcars. 
 
 <p align="center">
-![Car](Car.png)    
+![Car](Images/Car.png)    
 *Car*           
-![NotCar](NotCar.png)
+![NotCar](Images/NotCar.png)
 <p align="center">
 *Not Car*
 
@@ -53,18 +53,41 @@ The problem with this approach is that calculating HOG is very computationally e
 Applying different window sizes enhances the confidence of prediction because if there are a lot of windows(of different sizes) clustered in the same narrow area, then there is high confidence that there is a car in that area. Here are examples of detection at different window sizes(note the spurious detections).
  
 <p align="center">
-![WinSize0.6](WinSize0.6.png)    
+![WinSize0.6](Images/WinSize0.6.png)    
 *Window Size = 0.6x64 pixels*           
-![WinSize0.75](WinSize0.75.png)    
+![WinSize0.75](Images/WinSize0.75.png)    
 *Window Size = 0.75x64 pixels* 
-![WinSize1.0](WinSize1.0.png)    
+![WinSize1.0](Images/WinSize1.0.png)    
 *Window Size = 1.0x64 pixels* 
 <p align="center">
 
 ## Hot Spots
 One of the things which needs to be avoided is false positives from the previous step. To avoid false positives, I used different window scales, accumulated all the boxes. Then created a heat map to capture where the boxes were detected. Applied a threshold(of 5) to reject boxes which are "cool". This ensured that false positives are rejected when a final bounding box is created to represent the cars in an image(as shown below).
+
 <p align="center">
-![HotSpot](HotSpot.png)    
-*Hot Spots of Cars*
+![HotSpot](Images/HotSpot.png)    
+*Heat Map of Cars*
 <p align="center">
 
+One of the issues I was running into was that for the same car the way the windows were two hot spots in close proximity. This meant my final heatmap to adding boxes around cars algorithm had to be modified to make sure that there was only one bounding box around each car.
+
+## Final Result
+Attached are two videos with this submission. One video has just the vehicle detection and the other one has the vehicle detection combined with advanced lane finding. 
+
+## Discussion
+My algorithm works really great, the false positives are very small and the model does a really good job of identifying and putting a bounding box around the detected cars. 
+
+The following are things which can be improved or enhanced:
+
+1. Making the bounding box smoother across cars
+2. Reducing processing time by processing every other frame
+3. Reduce the number false positives even more
+4. Use a different machine learning model like a decision tree
+
+I can also envision certain problems:
+
+1. Detection during night time
+2. Rapid change in light and background
+3. Detecting other forms of vehicles like cycles, motorbikes & trucks
+
+The algorithm can definitely be worked on to resolve issues I mentioned and make it robust. 

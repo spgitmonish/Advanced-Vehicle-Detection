@@ -20,21 +20,13 @@ def classify_images(parameter_tuning_dict):
         cars = []
         notcars = []
 
-        # Read in cars and notcars
-        '''images = glob2.glob('labelled_data/*.jpeg')
-        for image in images:
-            if 'image' in image or 'extra' in image:
-                notcars.append(image)
-            else:
-                cars.append(image)'''
-
         # Using glob2's glob API read all the images of
         # vehicles and non-vehicles
-        car_images = glob2.glob('Datasets/vehicles/**/*.png')
+        car_images = glob2.glob('datasets/vehicles/**/*.png')
         for car_image in car_images:
             cars.append(car_image)
 
-        not_car_images = glob2.glob('Datasets/non-vehicles/**/*.png')
+        not_car_images = glob2.glob('datasets/non-vehicles/**/*.png')
         for not_car_image in not_car_images:
             notcars.append(not_car_image)
 

@@ -48,7 +48,7 @@ def pipelineVideo(image):
     draw_image = np.copy(image)
 
     # To display boxes for debug
-    display_boxes = True
+    display_boxes = False
 
     # The area in focus
     ystart = 400
@@ -126,7 +126,7 @@ def pipelineVideo(image):
     return draw_image
 
 # Selects which path to run
-debugRun = 2
+debugRun = 1
 
 # Heat Map based on limit HOG search of the video
 if debugRun == 1:
@@ -140,8 +140,8 @@ if debugRun == 1:
     # Global count to skip frames to reduce processing time
     frame_count = 0
 
-    project_output = 'project_video_output.mp4'
-    project_clip = VideoFileClip("project_video.mp4")
+    project_output = 'test_video_output.mp4'
+    project_clip = VideoFileClip("test_video.mp4")
     project_clip = project_clip.fl_image(pipelineVideo)
     project_clip.write_videofile(project_output, audio=False)
 if debugRun == 2:
