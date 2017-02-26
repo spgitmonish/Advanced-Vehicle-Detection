@@ -46,10 +46,25 @@ For classification I decided to use LinearSVM as it showed high accuracy in the 
 The accuracy I got on my test data using Linear SVM and the combined feature vector was pretty high >99%. 
 
 ## Sliding Window
-So the training and testing was done on small images(64x64 pixels). The next step was to detect cars in an image using a sliding window, creating a feature vector(HOG, HOC and Spatial Bins) and passing the feature vector for predicting. If there was a car detected that box is drawn in the image to indicate a car was found. 
+The training and testing was done on small images(64x64 pixels). The next step was to detect cars in an image using a sliding window, creating a feature vector(HOG, HOC and Spatial Bins) and passing the feature vector for predicting. If there was a car detected, a box is drawn on the image to indicate a car was found. 
 
-The problem with this approach is calculating HOG is very computationally expensive and this slows down the search. Instead the HOG was calculated for a certain area(400-656 pixel range along Y-axis) and then subsampling on the HOG matrix is applied for the specified window. This reduces computational time drastically and also allows applying different window sizes on the same image. I used window sizes which are [0.6, 0.75, 1.0] time 64x64 pixels. 
+The problem with this approach is that calculating HOG is very computationally expensive and slows down the search. Instead the HOG was calculated for a certain area(400-656 pixel range along Y-axis) and then subsampling on the HOG matrix is applied for the specified window. This reduces computational time drastically and also allows applying different window sizes on the same image. I used window sizes which are [0.6, 0.75, 1.0] time 64x64 pixels. 
 
-Applying different window sizes enhances the confidence of prediction because of there are a lot of windows(of different sizes) clustered in the same narrow area, then there is high confidence that there is a car in that area. 
+Applying different window sizes enhances the confidence of prediction because if there are a lot of windows(of different sizes) clustered in the same narrow area, then there is high confidence that there is a car in that area. Here are examples of detection at different window sizes(note the spurious detections).
+ 
+<p align="center">
+![WinSize0.6](WinSize0.6.png)    
+*Window Size = 0.6x64 pixels*           
+![WinSize0.75](WinSize0.75.png)    
+*Window Size = 0.75x64 pixels* 
+![WinSize1.0](WinSize1.0.png)    
+*Window Size = 1.0x64 pixels* 
+<p align="center">
 
 ## Hot Spots
+One of the things which needs to be avoided is false positives from the previous step. To avoid false positives, I used different window scales, accumulated all the boxes. Then created a heat map to capture where the boxes were detected. Applied a threshold(of 5) to reject boxes which are "cool". This ensured that false positives are rejected when a final bounding box is created to represent the cars in an image(as shown below).
+<p align="center">
+![HotSpot](HotSpot.png)    
+*Hot Spots of Cars*
+<p align="center">
+
