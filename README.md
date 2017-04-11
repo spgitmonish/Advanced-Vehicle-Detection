@@ -23,7 +23,7 @@ Getting a histogram of colors of an image(in a particular color space) helps dis
   <img src="/report/Images/HistogramOfColors.png">
 </p>
 <p align="center">
-  <i>Histogram of Colors*</i>
+  <i>Histogram of Colors</i>
 </p>
 
 ### 3. Spatial Binning of Color
